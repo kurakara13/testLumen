@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use App\User;
 
 class UserController extends Controller
 {
@@ -20,18 +21,33 @@ class UserController extends Controller
 
     public function login(Request $request)
      {
-         $this->validate($request, [
-         'email' => 'required',
-         'password' => 'required'
-          ]);
+       $email = $request->input('email');
+       $password = $request->input('password');
 
-       if(Hash::check($request->input('password'), 'testLumen'){
-            $apikey = base64_encode(str_random(40));
+       $user = User::where('email', $email)->first();
 
-            return response()->json(['status' => 'success','api_key' => $apikey]);
-        }else{
-            return response()->json(['status' => 'fail'],401);
-        }
+       if (Hash::check($password, $user->password)) {
+           $api_token = base64_encode(str_random(40));
+
+           $user->update([
+               'api_token' => $api_token
+           ]);
+
+           return response()->json([
+               'success' => true,
+               'message' => 'Login Success!',
+               'data' => [
+                   'user'      => $user,
+                   'api_token' => $api_token
+               ]
+           ], 201);
+       } else {
+           return response()->json([
+               'success' => false,
+               'message' => 'Login Failed!',
+               'data' => ''
+           ], 400);
+       }
      }
 
     //
