@@ -30,3 +30,14 @@ $router->get('/checklists/{id}', 'ChecklistController@show');
 $router->post('/checklists', 'ChecklistController@create');
 $router->patch('/checklists/{id}', 'ChecklistController@update');
 $router->delete('/checklists/{id}', 'ChecklistController@delete');
+
+// checklists item
+$router->get('/checklists/{checklistId}/items', 'ChecklistItemsController@showAll');
+$router->get('/checklists/{checklistId}/items/{itemId}', 'ChecklistItemsController@show');
+$router->post('/checklists/{checklistId}/items', 'ChecklistItemsController@create');
+$router->patch('/checklists/{checklistId}/items/{itemId}', 'ChecklistItemsController@update');
+$router->post('/checklists/{checklistId}/items/_bulk', 'ChecklistItemsController@update_bulk');
+$router->delete('/checklists/{checklistId}/items/{itemId}', 'ChecklistItemsController@delete');
+$router->post('/checklists/complete', 'ChecklistItemsController@complete');
+$router->post('/checklists/incomplete', 'ChecklistItemsController@incomplete');
+$router->get('/checklists/items/summaries', 'ChecklistItemsController@summaries');

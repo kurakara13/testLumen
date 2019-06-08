@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Checklists;
+use App\Query\QueryCustom;
 
 class ChecklistController extends Controller
 {
@@ -15,56 +16,18 @@ class ChecklistController extends Controller
 
     public function showAll(Request $request)
     {
+      if($request->sort){
+        $order = $request->sort;
+      }else {
+        $order = 'id';
+      }
       if($request->page_limit){
-        $checklists = Checklists::paginate(1);
+        $checklists = Checklists::orderBy($order, 'asc')->paginate($request->page_limit);
       }else{
-        $checklists = Checklists::all();
+        $checklists = Checklists::orderBy($order, 'asc')->get();
       }
 
-      $newData = $checklists;
-
-      if(is_array($request->filter)){
-        foreach($request->filter as $item => $values){
-          if(is_array($values)){
-            foreach ($values as $key => $value) {
-              if($key == 'like'){
-                $newData = $checklists->filter(function ($items) use ($value, $item){
-                                            if(is_array($items[$item])){
-                                              return stripos(implode($items[$item]),$value) !== false;
-                                            }else {
-                                              return stripos($items[$item],$value) !== false;
-                                            }
-                                        });
-              }else if($key == '!like'){
-                $newData = $checklists->filter(function ($items) use ($value, $item){
-                                            if(is_array($items[$item])){
-                                              return stripos(implode($items[$item]),$value) === false;
-                                            }else {
-                                              return stripos($items[$item],$value) === false;
-                                            }
-                                        });
-              }else if($key == 'is'){
-                $newData = $checklists->filter(function ($items) use ($value, $item){
-                                            if(is_array($items[$item])){
-                                              return implode($items[$item]) == $value;
-                                            }else {
-                                              return $items[$item] == $value;
-                                            }
-                                        });
-              }else if($key == '!is'){
-                $newData = $checklists->filter(function ($items) use ($value, $item){
-                                            if(is_array($items[$item])){
-                                              return implode($items[$item]) != $value;
-                                            }else {
-                                              return $items[$item] != $value;
-                                            }
-                                        });
-              }
-            }
-          }
-        }
-      }
-
+      $newData = QueryCustom::custom($checklists, $request);
 
       if ($newData) {
           return response()->json([
